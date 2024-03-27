@@ -3,18 +3,23 @@ from fastapi import Depends, FastAPI, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Customer, Item
+from app.models import Base, Customer, Item
 from app.schemas import (
     Customer as CustomerSchema,
     Item as ItemSchema,
     CustomerCreate,
     ItemCreate,
 )
-from .db_utils import create_tables, get_db, engine
+from .db_utils import get_db, engine
 
 
 app = FastAPI()
-create_tables(engine)
+
+
+@app.on_event("startup")
+async def startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 
 @app.post(
@@ -23,8 +28,9 @@ create_tables(engine)
 async def create_customer(customer: CustomerCreate, db: AsyncSession = Depends(get_db)):
     db_customer = Customer(**customer.model_dump())
     db.add(db_customer)
-    db.commit()
-    return None
+    await db.commit()
+    await db.refresh(db_customer)
+    return db_customer
 
 
 @app.get("/customers/{customer_id}", response_model=CustomerSchema)
@@ -37,8 +43,9 @@ async def get_customer(customer_id: int, db: AsyncSession = Depends(get_db)):
 async def create_item(item: ItemCreate, db: AsyncSession = Depends(get_db)):
     db_item = Item(**item.model_dump())
     db.add(db_item)
-    db.commit()
-    return None
+    await db.commit()
+    await db.refresh(db_item)
+    return db_item
 
 
 @app.get("/items/", response_model=List[ItemSchema])

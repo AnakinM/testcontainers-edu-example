@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from testcontainers.postgres import PostgresContainer
+from testcontainers.postgres import PostgresContainer  # type: ignore
 from fastapi.testclient import TestClient
 import pytest
 

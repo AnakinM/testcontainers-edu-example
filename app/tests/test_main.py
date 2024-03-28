@@ -1,5 +1,7 @@
 from fastapi.testclient import TestClient
 
+# API tests
+
 
 def test_create_customer(client: TestClient):
     response = client.post(
@@ -13,3 +15,45 @@ def test_create_customer(client: TestClient):
         "last_name": "Skywalker",
         "age": 42,
     }
+
+
+def test_get_customer(client: TestClient):
+    response = client.get("/customers/1")
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": 1,
+        "first_name": "Anakin",
+        "last_name": "Skywalker",
+        "age": 42,
+    }
+
+
+def test_create_item(client: TestClient):
+    response = client.post(
+        "/items/",
+        json={
+            "name": "Lightsaber",
+            "description": "A real thing, not a toy!",
+            "price": 1000.0,
+        },
+    )
+    assert response.status_code == 201
+    assert response.json() == {
+        "id": 1,
+        "name": "Lightsaber",
+        "description": "A real thing, not a toy!",
+        "price": 1000.0,
+    }
+
+
+def test_list_items(client: TestClient):
+    response = client.get("/items/")
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "id": 1,
+            "name": "Lightsaber",
+            "description": "A real thing, not a toy!",
+            "price": 1000.0,
+        }
+    ]

@@ -1,8 +1,10 @@
 from fastapi.testclient import TestClient
+import pytest
 
 # API tests
 
 
+@pytest.mark.usefixtures("db_setup")
 def test_create_customer(client: TestClient):
     response = client.post(
         "/customers/",
@@ -17,6 +19,7 @@ def test_create_customer(client: TestClient):
     }
 
 
+@pytest.mark.usefixtures("db_setup")
 def test_get_customer(client: TestClient):
     response = client.get("/customers/1")
     assert response.status_code == 200
@@ -28,6 +31,7 @@ def test_get_customer(client: TestClient):
     }
 
 
+@pytest.mark.usefixtures("db_setup")
 def test_create_item(client: TestClient):
     response = client.post(
         "/items/",
@@ -46,6 +50,7 @@ def test_create_item(client: TestClient):
     }
 
 
+@pytest.mark.usefixtures("db_setup")
 def test_list_items(client: TestClient):
     response = client.get("/items/")
     assert response.status_code == 200

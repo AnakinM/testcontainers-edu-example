@@ -16,12 +16,6 @@ from .db_utils import get_db, engine
 app = FastAPI()
 
 
-@app.on_event("startup")
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-
 @app.post(
     "/customers/", response_model=CustomerSchema, status_code=status.HTTP_201_CREATED
 )
@@ -52,3 +46,10 @@ async def create_item(item: ItemCreate, db: AsyncSession = Depends(get_db)):
 async def list_items(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Item))
     return result.scalars().all()
+
+
+if __name__ == "__main__":
+    Base.metadata.create_all(engine)
+    import uvicorn
+
+    uvicorn.run(app, host="localhost", port=3000)

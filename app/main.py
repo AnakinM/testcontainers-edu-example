@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import List
 from fastapi import Depends, FastAPI, status
 
@@ -9,10 +10,20 @@ from app.schemas import (
     ItemCreate,
 )
 from app.services import CustomerService, ItemService
-from .db_utils import engine
+from app.db_utils import engine
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        yield
+    finally:
+        await engine.dispose()
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.post(
@@ -39,8 +50,6 @@ async def list_items(item_service: ItemService = Depends()):
     return await item_service.get_all()
 
 
-if __name__ == "__main__":
-    Base.metadata.create_all(engine)
-    import uvicorn
-
-    uvicorn.run(app, host="localhost", port=3000)
+async def startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)

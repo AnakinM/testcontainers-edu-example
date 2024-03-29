@@ -48,8 +48,3 @@ async def create_item(item: ItemCreate, item_service: ItemService = Depends()):
 @app.get("/items/", response_model=List[ItemSchema])
 async def list_items(item_service: ItemService = Depends()):
     return await item_service.get_all()
-
-
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)

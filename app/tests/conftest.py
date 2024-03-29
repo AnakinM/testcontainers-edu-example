@@ -20,9 +20,6 @@ postgres = PostgresContainer(
 
 unbound_postgres = PostgresContainer(
     "postgres:16-alpine",
-    username="anakin",
-    password="anakin",
-    dbname="testdb",
 )
 
 
